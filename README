@@ -1,0 +1,7 @@
+A simple wrapper script for udisksctl.
+
+Usage:
+    `udisk status` - prints actual mountable devices instead of just "sda", "sdb", etc.
+    `udisk mount /dev/sda1` - does the same as `udisksctl mount -b /dev/sda1`
+    `udisk umount /dev/sda1` - does the same as `udisksctl unmount -b /dev/sda1`
+                               (but with `umount` instead of `unmount`)
