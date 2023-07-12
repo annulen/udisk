@@ -3,14 +3,27 @@
 use strict;
 use warnings;
 
-my %commands = (
+my @commands_ordered = (
     status => "Shows high-level status",
     mount => "Mount a filesystem",
-    umount => "Unmount a filesystem"
+    umount => "Unmount a filesystem",
+    help => "Shows this information"
 );
+my %commands = @commands_ordered;
+
+sub help {
+    print "Usage: $0 COMMAND\n\n";
+    print "Commands:\n";
+    for(my $i = 0; $i < @commands_ordered; $i += 2) {
+        my ($c, $h) = @commands_ordered[$i, $i + 1];
+        printf "  %-15s  %s\n", $c, $h;
+    }
+}
 
 sub usage {
-    die shift;
+    print "@_\n";
+    help();
+    exit(1);
 }
 
 sub status_processHeader {
@@ -28,7 +41,7 @@ sub status_processHeader {
 sub status {
     my $cmd = "udisksctl status";
     open my $pipe, "-|", $cmd;
-    status_processHeader($pipe, $cmd) or die "Invalid output format for `$cmd'";;
+    status_processHeader($pipe, $cmd) or usage "Unrecognized output format for `$cmd'";;
 
     my $fmt = "%15s    %s\n";
 
