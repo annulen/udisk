@@ -1,0 +1,23 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+my %commands = (
+    status => "Shows high-level status",
+);
+
+sub usage {
+    die shift;
+}
+
+sub status {
+    system("udisksctl status");
+}
+
+my $cmd = shift @ARGV;
+exists $commands{$cmd} or usage "Unknown command `$cmd'";
+{
+    no strict 'refs';
+    &$cmd;
+}
