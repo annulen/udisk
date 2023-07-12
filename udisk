@@ -5,19 +5,67 @@ use warnings;
 
 my %commands = (
     status => "Shows high-level status",
+    mount => "Mount a filesystem",
+    umount => "Unmount a filesystem"
 );
 
 sub usage {
     die shift;
 }
 
+sub status_processHeader {
+    my $pipe = shift;
+
+    # MODEL REVISION SERIAL DEVICE
+    # ----------------------------
+    $_ = <$pipe>;
+    join(' ', split) eq "MODEL REVISION SERIAL DEVICE" or return "";
+    $_ = <$pipe>;
+    /^-*$/ or return "";
+    return 1;
+}
+
 sub status {
-    system("udisksctl status");
+    my $cmd = "udisksctl status";
+    open my $pipe, "-|", $cmd;
+    status_processHeader($pipe, $cmd) or die "Invalid output format for `$cmd'";;
+
+    my $fmt = "%15s    %s\n";
+
+    printf $fmt, "Model", "Device";
+    print "-" x 75, "\n";
+
+    while (<$pipe>) {
+        my @fields = split /\s+/;
+        my $dev = "/dev/$fields[-1]";
+        my @devs = glob("$dev*");
+        printf $fmt, $fields[0], $dev;
+        printf $fmt, $fields[1], "(@devs)";
+        print "\n";
+    }
+}
+
+sub mount {
+    my $cmd = "udisksctl mount -b";
+    for my $dev (@_) {
+        print "$cmd $dev\n";
+        system("$cmd $dev");
+        print "\n";
+    }
+}
+
+sub umount {
+    my $cmd = "udisksctl unmount -b";
+    for my $dev (@_) {
+        print "$cmd $dev\n";
+        system("$cmd $dev");
+        print "\n";
+    }
 }
 
 my $cmd = shift @ARGV;
 exists $commands{$cmd} or usage "Unknown command `$cmd'";
 {
     no strict 'refs';
-    &$cmd;
+    &$cmd(@ARGV);
 }
