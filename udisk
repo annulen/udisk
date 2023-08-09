@@ -96,13 +96,28 @@ sub wait {
     status();
 }
 
+sub complete {
+    my $comp_line = shift;
+    open my $log, '>>', 'complete.log';
+    print $log "$comp_line ~~~ $0\n";
+    return if $comp_line !~ /^$0 (.*)$/;
+    print $log "$comp_line ~~~ $1\n";
+}
+
 my $cmd = shift @ARGV // "status";
 
 # Hidden command for completion
 if ($cmd eq 'complete') {
-    for(my $i = 0; $i < @commands_ordered; $i += 2) {
-        print $commands_ordered[$i], " ";
+    scalar @ARGV == 2 or usage "Unknown command `$cmd'";
+
+    my ($comp_line, $comp_point) = @ARGV;
+    my $len = length $comp_line;
+    if ($len == $comp_point) {
+        complete($comp_line);
     }
+    #    for(my $i = 0; $i < @commands_ordered; $i += 2) {
+    #        print $commands_ordered[$i], " ";
+    #    }
     exit(0);
 }
 
