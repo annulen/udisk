@@ -31,30 +31,30 @@ sub status_processHeader {
 
     # MODEL REVISION SERIAL DEVICE
     # ----------------------------
-    $_ = <$pipe>;
-    join(' ', split) eq "MODEL REVISION SERIAL DEVICE" or return "";
+    my $hdr = <$pipe>;
+    $hdr =~ /^MODEL\s+(REVISION)\s+(SERIAL)\s+(DEVICE)/ or return "";
+
+    my @l = map { $-[$_] - $-[$_-1] } 1..3;
+    my $in_fmt = sprintf "A%sA%sA%sA*", @l;
+    my $out_fmt = sprintf "A%sA*", $l[0];
+
     $_ = <$pipe>;
     /^-*$/ or return "";
-    return 1;
+    return $in_fmt, $out_fmt
 }
 
 sub status {
     my $cmd = "udisksctl status";
     open my $pipe, "-|", $cmd;
-    status_processHeader($pipe, $cmd) or usage "Unrecognized output format for `$cmd'";;
 
-    my $fmt = "%15s    %s\n";
-
-    printf $fmt, "Model", "Device";
-    print "-" x 75, "\n";
+    my ($in_fmt, $out_fmt) = status_processHeader($pipe, $cmd)
+        or usage "Unrecognized output format for `$cmd'";
 
     while (<$pipe>) {
-        my @fields = split /\s+/;
-        my $dev = "/dev/$fields[-1]";
-        my @devs = glob("$dev*");
-        printf $fmt, $fields[0], $dev;
-        printf $fmt, $fields[1], "(@devs)";
-        print "\n";
+        my @fields = unpack $in_fmt;
+        my $dev = pop @fields;
+        my @devs = glob("/dev/$dev*");
+        print pack $out_fmt, $fields[0], "@devs\n";
     }
 }
 
