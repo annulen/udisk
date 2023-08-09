@@ -54,7 +54,11 @@ sub status {
         my @fields = unpack $in_fmt;
         my $dev = pop @fields;
         my @devs = glob("/dev/$dev*");
-        print pack $out_fmt, $fields[0], "@devs\n";
+        @devs >= 1 or die "/dev/$dev not found";
+        print pack $out_fmt, $fields[0], "$devs[0]\n";
+        for my $i (1..$#devs) {
+            print pack $out_fmt, "", "$devs[$i]\n";
+        }
     }
 }
 
