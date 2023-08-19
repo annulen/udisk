@@ -1,0 +1,1 @@
+complete -W "$(udisk complete)" udisk

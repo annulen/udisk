@@ -97,6 +97,15 @@ sub wait {
 }
 
 my $cmd = shift @ARGV // "status";
+
+# Hidden command for completion
+if ($cmd eq 'complete') {
+    for(my $i = 0; $i < @commands_ordered; $i += 2) {
+        print $commands_ordered[$i], " ";
+    }
+    exit(0);
+}
+
 exists $commands{$cmd} or usage "Unknown command `$cmd'";
 {
     no strict 'refs';
