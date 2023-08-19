@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 my @commands_ordered = (
-    status => "Shows high-level status",
+    status => "Shows high-level status (default)",
     mount => "Mount a filesystem",
     umount => "Unmount a filesystem",
     help => "Shows this information"
@@ -12,7 +12,7 @@ my @commands_ordered = (
 my %commands = @commands_ordered;
 
 sub help {
-    print "Usage: $0 COMMAND\n\n";
+    print "Usage: $0 [COMMAND]\n\n";
     print "Commands:\n";
     for(my $i = 0; $i < @commands_ordered; $i += 2) {
         my ($c, $h) = @commands_ordered[$i, $i + 1];
@@ -80,7 +80,7 @@ sub umount {
     }
 }
 
-my $cmd = shift @ARGV;
+my $cmd = shift @ARGV // "status";
 exists $commands{$cmd} or usage "Unknown command `$cmd'";
 {
     no strict 'refs';
