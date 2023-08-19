@@ -67,6 +67,7 @@ sub mount {
     for my $dev (@_) {
         print "$cmd $dev\n";
         system("$cmd $dev");
+        print "Exit code: $?\n";
         print "\n";
     }
 }
@@ -76,6 +77,7 @@ sub umount {
     for my $dev (@_) {
         print "$cmd $dev\n";
         system("$cmd $dev");
+        print "Exit code: $?\n";
         print "\n";
     }
 }
