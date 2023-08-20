@@ -1,7 +1,10 @@
-A simple wrapper script for udisksctl.
+Manual device mounting made easy.
+
+This is a wrapper script for `udisksctl` making it more convenient to use.
 
 Usage:
-    `udisk status` - prints actual mountable devices instead of just "sda", "sdb", etc.
-    `udisk mount /dev/sda1` - does the same as `udisksctl mount -b /dev/sda1`
-    `udisk umount /dev/sda1` - does the same as `udisksctl unmount -b /dev/sda1`
-                               (but with `umount` instead of `unmount`)
+    `udisk` (or `udisk status`) - prints actual mountable devices instead of just "sda", "sdb", etc.
+    `udisk wait`                - waits for new device to appear then prints status
+    `udisk mount /dev/sda1`     - does the same as `udisksctl mount -b /dev/sda1`
+    `udisk umount /dev/sda1`    - does the same as `udisksctl unmount -b /dev/sda1`
+                                  (but with `umount` instead of `unmount`)

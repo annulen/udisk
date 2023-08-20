@@ -4,9 +4,10 @@ use strict;
 use warnings;
 
 my @commands_ordered = (
-    status => "Shows high-level status (default)",
-    mount => "Mount a filesystem",
-    umount => "Unmount a filesystem",
+    status => "Prints high-level status (default command)",
+    mount => "Mounts a filesystem",
+    umount => "Unmounts a filesystem",
+    wait => "Waits for new device to appear then prints status",
     help => "Shows this information"
 );
 my %commands = @commands_ordered;
@@ -45,7 +46,7 @@ sub status_processHeader {
 
 sub status {
     my $cmd = "udisksctl status";
-    open my $pipe, "-|", $cmd;
+    open my $pipe, "-|", $cmd or die "$cmd failed: $!";
 
     my ($in_fmt, $out_fmt) = status_processHeader($pipe, $cmd)
         or usage "Unrecognized output format for `$cmd'";
@@ -80,6 +81,19 @@ sub umount {
         print "Exit code: $?\n";
         print "\n";
     }
+}
+
+sub wait {
+    my $cmd = "udisksctl monitor";
+    my $pid = open my $pipe, "-|", $cmd or die "$cmd failed: $!";
+    while (<$pipe>) {
+        print;
+        last if (/^[0-9.:]+: Added /);
+    }
+    print "Stopping monitor...\n";
+    kill 9, $pid;
+    print "\n";
+    status();
 }
 
 my $cmd = shift @ARGV // "status";
