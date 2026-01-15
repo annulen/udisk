@@ -54,17 +54,35 @@ sub status_processHeader {
     return $in_fmt, $out_fmt;
 }
 
+sub status_printDev {
+    my ($model, $dev, $paths, $out_fmt) = @_;
+    my $mount_point = defined $paths ? $paths->{$dev} // "Not mounted"
+                                     : "";
+    printf $out_fmt, $model, "$dev\t\t$mount_point\n";
+}
+
 sub status_printDevRoot {
-    my ($model, $dev, $out_fmt) = @_;
+    my ($model, $dev, $paths, $out_fmt) = @_;
 
     $dev = "/dev/$dev";
     -e "$dev" or die "Device file does not exist: $dev";
     my @devs = glob("$dev*");
 
-    printf $out_fmt, $model, "$devs[0]\n";
+    status_printDev $model, $devs[0], undef, $out_fmt;
     for my $i (1..$#devs) {
-        printf $out_fmt, "", "$devs[$i]\n";
+        status_printDev '', $devs[$i], $paths, $out_fmt;
     }
+}
+
+sub loadMountPoints {
+    my %paths;
+    open my $mounts, '<', '/proc/mounts';
+    while (<$mounts>) {
+        my ($dev, $path) = split ' ', $_, 3;
+        # For now we save only one mount point path per device
+        $paths{$dev} = $path;
+    }
+    return \%paths;
 }
 
 sub status {
@@ -74,11 +92,13 @@ sub status {
     my ($in_fmt, $out_fmt) = status_processHeader($pipe, $cmd)
         or usage "Unrecognized output format for `$cmd'";
 
+    my $paths = loadMountPoints();
+
     while (<$pipe>) {
         my @fields = m/$in_fmt/;
         @fields == 4 or die "Failed to parse line: $_";
         my $dev = pop @fields;
-        status_printDevRoot($fields[0], $dev, $out_fmt);
+        status_printDevRoot($fields[0], $dev, $paths, $out_fmt);
     }
 }
 
