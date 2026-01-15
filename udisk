@@ -54,6 +54,19 @@ sub status_processHeader {
     return $in_fmt, $out_fmt;
 }
 
+sub status_printDevRoot {
+    my ($model, $dev, $out_fmt) = @_;
+
+    $dev = "/dev/$dev";
+    -e "$dev" or die "Device file does not exist: $dev";
+    my @devs = glob("$dev*");
+
+    printf $out_fmt, $model, "$devs[0]\n";
+    for my $i (1..$#devs) {
+        printf $out_fmt, "", "$devs[$i]\n";
+    }
+}
+
 sub status {
     my $cmd = "udisksctl status";
     open my $pipe, "-|", $cmd or die "$cmd failed: $!";
@@ -65,13 +78,7 @@ sub status {
         my @fields = m/$in_fmt/;
         @fields == 4 or die "Failed to parse line: $_";
         my $dev = pop @fields;
-        $dev = "/dev/$dev";
-        -e "$dev" or die "Device file does not exist: $dev";
-        my @devs = glob("$dev*");
-        printf $out_fmt, $fields[0], "$devs[0]\n";
-        for my $i (1..$#devs) {
-            printf $out_fmt, "", "$devs[$i]\n";
-        }
+        status_printDevRoot($fields[0], $dev, $out_fmt);
     }
 }
 
