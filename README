@@ -8,3 +8,16 @@ Usage:
     `udisk mount /dev/sda1`     - does the same as `udisksctl mount -b /dev/sda1`
     `udisk umount /dev/sda1`    - does the same as `udisksctl unmount -b /dev/sda1`
                                   (but with `umount` instead of `unmount`)
+
+Example of status output:
+
+
+Samsung SSD 970 EVO Plus 500GB   /dev/nvme0n1
+                                 /dev/nvme0n1p1        /boot/efi
+                                 /dev/nvme0n1p2        /
+WDC WD40EFAX-68JH4N1             /dev/sda
+Kingston DataTraveler 160        /dev/sdb
+                                 /dev/sdb1        Not mounted
+                                 /dev/sdb2        /media/ktokarev/DISK2S2
+                                 /dev/sdb4        Not mounted
+
